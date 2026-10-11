@@ -17,23 +17,15 @@ def home():
 
 @app.route('/song/')
 def search():
-    lyrics = False
-    songdata = True
     query = request.args.get('query')
-    lyrics_ = request.args.get('lyrics')
-    songdata_ = request.args.get('songdata')
-    if lyrics_ and lyrics_.lower() != 'false':
-        lyrics = True
-    if songdata_ and songdata_.lower() != 'true':
-        songdata = False
+    page = request.args.get('page', default=1, type=int)
+    limit = request.args.get('limit', default=20, type=int)
+    lyrics = request.args.get('lyrics', default='false').lower() == 'true'
+    songdata = request.args.get('songdata', default='true').lower() == 'true'
     if query:
-        return jsonify(jiosaavn.search_for_song(query, lyrics, songdata))
+        return jsonify(jiosaavn.search_for_song(query, lyrics, songdata, page, limit))
     else:
-        error = {
-            "status": False,
-            "error": 'Query is required to search songs!'
-        }
-        return jsonify(error)
+        return jsonify({"status": False, "error": "Query is required to search songs!"}), 400
 
 
 @app.route('/song/get/')

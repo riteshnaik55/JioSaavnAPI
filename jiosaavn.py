@@ -5,6 +5,9 @@ import json
 from traceback import print_exc
 import re
 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+}
 
 def search_for_song(query, lyrics=False, songdata=True, page=1, limit=20):
     if query.startswith('http') and 'saavn.com' in query:

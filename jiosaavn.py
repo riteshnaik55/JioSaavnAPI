@@ -6,24 +6,29 @@ from traceback import print_exc
 import re
 
 
-def search_for_song(query, lyrics, songdata):
+def search_for_song(query, lyrics=False, songdata=True, page=1, limit=20):
     if query.startswith('http') and 'saavn.com' in query:
         id = get_song_id(query)
         return get_song(id, lyrics)
-
-    search_base_url = endpoints.search_base_url+query
-    response = requests.get(search_base_url).text.encode().decode('unicode-escape')
-    pattern = r'\(From "([^"]+)"\)'
-    response = json.loads(re.sub(pattern, r"(From '\1')", response))
-    song_response = response['songs']['data']
+    url = f"{endpoints.search_base_url}&p={page}&n={limit}&q={query}"
+    res = requests.get(url, headers=headers)
+    
+    try:
+        response = res.json()
+    except Exception:
+        # Fallback if unescaped formatting is needed
+        response = json.loads(res.text.encode().decode('unicode-escape'))
+    # search.getResults returns tracks in 'results'
+    song_response = response.get('results', [])
     if not songdata:
         return song_response
     songs = []
     for song in song_response:
-        id = song['id']
-        song_data = get_song(id, lyrics)
-        if song_data:
-            songs.append(song_data)
+        id = song.get('id')
+        if id:
+            song_data = get_song(id, lyrics)
+            if song_data:
+                songs.append(song_data)
     return songs
 
 
